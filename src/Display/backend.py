@@ -7,6 +7,10 @@ PYSIDE = "qt-pyside"
 PYQT4 = "qt-pyqt4"
 PYQT5 = "qt-pyqt5"
 
+global QtCore, QtGui, QtWidgets, QtOpenGL
+global HAVE_PYQT5, HAVE_PYQT4, HAVE_PYSIDE, HAVE_WX, HAVE_BACKEND, \
+    BACKEND_MODULE, QtCore, QtGui, QtWidgets, QtOpenGL
+
 # backend module
 HAVE_PYQT5, HAVE_PYQT4, HAVE_PYSIDE, HAVE_WX = False, False, False, False
 
@@ -14,8 +18,9 @@ HAVE_PYQT5, HAVE_PYQT4, HAVE_PYSIDE, HAVE_WX = False, False, False, False
 HAVE_BACKEND = False
 BACKEND_MODULE = "No backend loaded"
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+from utils.logging_env import setup_logging, logging
 log = logging.getLogger(__name__)
+setup_logging(log)
 
 
 def load_pyqt5():
@@ -96,29 +101,6 @@ def get_loaded_backend():
     return BACKEND_MODULE
 
 
-def load_any_qt_backend():
-    """ loads any qt based backend. First try to load
-    PyQt5, then PyQt4 and finally PySide. Raise an exception
-    if none of them are available
-    """
-    try:
-        load_backend(PYQT5)
-        return True
-    except:
-        pass
-    try:
-        load_backend(PYQT4)
-        return True
-    except:
-        pass
-    try:
-        load_backend(PYSIDE)
-        return True
-    except:
-        pass
-    raise AssertionError("None of the PyQt5 orPtQt4 or PySide backend can be loaded")
-
-
 def load_backend(backend_str=None):
     """ loads a gui backend
 
@@ -162,9 +144,9 @@ def load_backend(backend_str=None):
     global HAVE_BACKEND, BACKEND_MODULE
 
     if HAVE_BACKEND:
-        msg = "The {0} backend is already loaded..." \
-              "``load_backend`` can only be called once per session".format(BACKEND_MODULE)
-        log.info(msg)
+        #msg = "The {0} backend is already loaded..." \
+              #"``load_backend`` can only be called once per session".format(BACKEND_MODULE)
+        #log.info(msg)
         return BACKEND_MODULE
 
     if backend_str is not None:
@@ -180,7 +162,7 @@ def load_backend(backend_str=None):
         if load_pyqt5():
             HAVE_BACKEND = True
             BACKEND_MODULE = 'qt-pyqt5'
-            log.info("backend loaded: {0}".format(BACKEND_MODULE))
+            log.debug("backend loaded: {0}".format(BACKEND_MODULE))
             return BACKEND_MODULE
         if backend_str == PYQT5 and not HAVE_BACKEND:
             msg = "{0} could not be loaded".format(backend_str)
@@ -193,7 +175,7 @@ def load_backend(backend_str=None):
         if load_pyqt4():
             HAVE_BACKEND = True
             BACKEND_MODULE = 'qt-pyqt4'
-            log.info("backend loaded: {0}".format(BACKEND_MODULE))
+            log.debug("backend loaded: {0}".format(BACKEND_MODULE))
             return BACKEND_MODULE
         elif backend_str == PYQT4 and not HAVE_BACKEND:
             msg = "{0} could not be loaded".format(backend_str)
@@ -207,7 +189,7 @@ def load_backend(backend_str=None):
         if load_pyside():
             HAVE_BACKEND = True
             BACKEND_MODULE = 'qt-pyside'
-            log.info("backend loaded: {0}".format(BACKEND_MODULE))
+            log.debug("backend loaded: {0}".format(BACKEND_MODULE))
             return BACKEND_MODULE
         elif backend_str == PYSIDE and not HAVE_BACKEND:
             msg = "{0} could not be loaded".format(backend_str)
@@ -220,7 +202,7 @@ def load_backend(backend_str=None):
         if load_wx():
             HAVE_BACKEND = True
             BACKEND_MODULE = 'wx'
-            log.info("backend loaded: {0}".format(BACKEND_MODULE))
+            log.debug("backend loaded: {0}".format(BACKEND_MODULE))
             return BACKEND_MODULE
         elif backend_str == WX and not HAVE_BACKEND:
             msg = "{0} could not be loaded".format(backend_str)

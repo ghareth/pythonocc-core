@@ -9,8 +9,10 @@ setup(
     description='description to follow',
     author='Gareth Boyes',
     author_email='gareth.boyes@gxbis.com',
-    packages=['pythonocc/Display',
+    packages=['pythonocc',
+              'pythonocc/Display',
               'pythonocc/Display/WebGl'],
-    package_dir={'pythonocc/Display': 'src/Display',
+    package_dir={'pythonocc': 'src',
+                 'pythonocc/Display': 'src/Display',
                  'pythonocc/Display/WebGl': 'src/Display/WebGl'},
     include_package_data=True)

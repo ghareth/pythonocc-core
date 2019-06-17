@@ -17,15 +17,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import os
 import sys
 
-from OCC import VERSION
-from OCC.Display.backend import load_backend, get_qt_modules
-from OCC.Display.OCCViewer import OffscreenRenderer
+from pythonocc import VERSION
+from pythonocc.Display.backend import load_backend, get_qt_modules
+from pythonocc.Display.OCCViewer import OffscreenRenderer
 
+from utils.logging_env import setup_logging, logging
 log = logging.getLogger(__name__)
+setup_logging(log)
 
 
 def check_callable(_callable):
@@ -34,10 +35,12 @@ def check_callable(_callable):
 
 
 def init_display(backend_str=None,
-                 size=(1024, 768),
+                 disp=None,
+                 size=(600, 400),
                  display_triedron=True,
                  background_gradient_color1=[206, 215, 222],
-                 background_gradient_color2=[128, 128, 128]):
+                 background_gradient_color2=[128, 128, 128],
+                 perspective=True):
     """ This function loads and initialize a GUI using either wx, pyq4, pyqt5 or pyside.
     If ever the environment variable PYTHONOCC_OFFSCREEN_RENDERER, then the GUI is simply
     ignored and an offscreen renderer is returned.
@@ -58,8 +61,7 @@ def init_display(backend_str=None,
         offscreen_renderer = OffscreenRenderer()
 
         def do_nothing(*kargs, **kwargs):
-            """ takes as many parameters as you want,
-            ans does nothing
+            """ A method that does nothing
             """
             pass
 
@@ -68,14 +70,14 @@ def init_display(backend_str=None,
             Helpfull to bypass add_function_to_menu. s should be a string
             """
             check_callable(func)
-            log.info("Execute %s :: %s menu fonction" % (s, func.__name__))
+            log.debug("Execute %s :: %s menu fonction" % (s, func.__name__))
             func()
-            log.info("done")
 
         # returns empty classes and functions
         return offscreen_renderer, do_nothing, do_nothing, call_function
     used_backend = load_backend(backend_str)
-    log.info("GUI backend set to: %s", used_backend)
+    log.debug("GUI backend set to: %s", used_backend)
+    
     # wxPython based simple GUI
     if used_backend == 'wx':
         import wx
@@ -127,18 +129,25 @@ def init_display(backend_str=None,
 
     # Qt based simple GUI
     elif 'qt' in used_backend:
-        from OCC.Display.qtDisplay import qtViewer3d
+        
+        from pythonocc.Display.qtDisplay import qtViewer3d
+              
+        
         QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
 
         class MainWindow(QtWidgets.QMainWindow):
 
-            def __init__(self, *args):
+            def __init__(self, *args, **kwargs):
                 QtWidgets.QMainWindow.__init__(self, *args)
-                self.canva = qtViewer3d(self)
+                
+                perspective = kwargs.get('perspective', False)
+                
+                self.canva = qtViewer3d(self, perspective = perspective)
                 self.setWindowTitle("pythonOCC-%s 3d viewer ('%s' backend)" % (VERSION, used_backend))
                 self.setCentralWidget(self.canva)
                 if sys.platform != 'darwin':
                     self.menu_bar = self.menuBar()
+                    
                 else:
                     # create a parentless menubar
                     # see: http://stackoverflow.com/questions/11375176/qmenubar-and-qmenu-doesnt-show-in-mac-os-x?lq=1
@@ -147,7 +156,12 @@ def init_display(backend_str=None,
                     # next to the apple icon
                     # still does ugly things like showing the "Python" menu in
                     # bold
-                    self.menu_bar = QtWidgets.QMenuBar()
+                    
+                    #Origial code ..
+                    #self.menu_bar = QtWidgets.QMenuBar()
+                    #Replaced by http://littlecaptain.net/2017/10/13/PyQt5-tutorial-Menus-and-toolbars/
+                    self.menu_bar = self.menuBar()
+                    self.menu_bar.setNativeMenuBar(False)
                 self._menus = {}
                 self._menu_methods = {}
                 # place the window in the center of the screen, at half the
@@ -156,16 +170,22 @@ def init_display(backend_str=None,
 
             def centerOnScreen(self):
                 '''Centers the window on the screen.'''
-                resolution = QtWidgets.QApplication.desktop().screenGeometry()
-                x = (resolution.width() - self.frameSize().width()) / 2
-                y = (resolution.height() - self.frameSize().height()) / 2
-                self.move(x, y)
+                resolution = QtWidgets.QDesktopWidget().screenGeometry()
+                log.debug( resolution)
+                self.resize((resolution.width() / 1.1), (resolution.height() / 1.1))
+                
+                self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
+                          (resolution.height() / 2) - (self.frameSize().height() / 2))
+                #self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
+                                      #(resolution.height() / 8) )                
 
             def add_menu(self, menu_name):
+                
                 _menu = self.menu_bar.addMenu("&" + menu_name)
                 self._menus[menu_name] = _menu
 
             def add_function_to_menu(self, menu_name, _callable):
+                
                 check_callable(_callable)
                 try:
                     _action = QtWidgets.QAction(_callable.__name__.replace('_', ' ').lower(), self)
@@ -176,18 +196,38 @@ def init_display(backend_str=None,
                     self._menus[menu_name].addAction(_action)
                 except KeyError:
                     raise ValueError('the menu item %s does not exist' % menu_name)
+                
+                
+            def add_function(self, _callable):
+                check_callable(_callable)
+                self.canva._actions[_callable.__name__] = QtWidgets.QAction(_callable.__name__.replace('_', ' ').lower(), self)
+                self.canva._actions[_callable.__name__].triggered.connect(_callable)
+                self.canva.addAction(self.canva._actions[_callable.__name__])
+                
+            #def add_function_list(self, function_list):
+                #self.canva.action_list = function_list
+                              
+                
+                
 
-        # following couple of lines is a tweak to enable ipython --gui='qt'
+        # following couple of lines is a twek to enable ipython --gui='qt'
+        
         app = QtWidgets.QApplication.instance()  # checks if QApplication already exists
         if not app:  # create QApplication if it doesnt exist
             app = QtWidgets.QApplication(sys.argv)
-        win = MainWindow()
+        win = MainWindow(perspective = perspective)
         win.show()
-        win.resize(size[0], size[1])
-        win.centerOnScreen()
-        win.canva.InitDriver()
+        #win.window().setScreen(app.screens()[0])
+        #win.resize(size[0], size[1])
+
+        win.canva.InitDriver(win.close)
         win.canva.qApp = app
         display = win.canva._display
+
+        # background gradient
+        display.set_bg_gradient_color(206, 215, 222, 128, 128, 128)
+        # display black triedron
+        display.display_triedron()
 
         def add_menu(*args, **kwargs):
             win.add_menu(*args, **kwargs)
@@ -198,20 +238,49 @@ def init_display(backend_str=None,
         def start_display():
             win.raise_()  # make the application float to the top
             app.exec_()
+            
+            
+        def add_function(*args, **kwargs):
+            win.add_function(*args, **kwargs)
 
-    if display_triedron:
-        display.display_triedron()
 
-    if background_gradient_color1 and background_gradient_color2:
-    # background gradient
-        display.set_bg_gradient_color(background_gradient_color1, background_gradient_color2)
+        #def add_function_list(*args, **kwargs):
+            #win.add_function_list(*args, **kwargs)
+            
+        #def close():
+            ##print ('closing window')
+            #win.close()
+            
+        add_menu('exit')
+        add_function_to_menu('exit', win.close)
+        add_function(win.close)
+            
+        disp['start'] = start_display
+        disp['add_menu'] = add_menu
+        disp['add_function_to_menu'] = add_function_to_menu
+        disp['add_function'] = add_function
+        #disp['add_function_list'] = add_function_list
+        disp['canva'] = win.canva
+        disp['win'] = win
+        
+        #disp['close'] = close
+        
+        disp['selected'] = win.canva.selected
+        
 
-    return display, start_display, add_menu, add_function_to_menu
+        
+    return display 
 
 
 if __name__ == '__main__':
-    display, start_display, add_menu, add_function_to_menu = init_display("qt-pyqt5")
+    
     from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere, BRepPrimAPI_MakeBox
+    
+    disp={}
+    
+    display = init_display( disp=disp, perspective = True)
+    
+    
 
     def sphere(event=None):
         display.DisplayShape(BRepPrimAPI_MakeSphere(100).Shape(), update=True)
@@ -219,11 +288,17 @@ if __name__ == '__main__':
     def cube(event=None):
         display.DisplayShape(BRepPrimAPI_MakeBox(1, 1, 1).Shape(), update=True)
 
-    def quit(event=None):
+    def exit(event=None):
         sys.exit()
 
-    add_menu('primitives')
-    add_function_to_menu('primitives', sphere)
-    add_function_to_menu('primitives', cube)
-    add_function_to_menu('primitives', quit)
-    start_display()
+    #display.Test()
+    
+    
+    
+    disp['add_menu']('primitives')
+    disp['add_function_to_menu']('primitives', sphere)
+    disp['add_function_to_menu']('primitives', cube)
+    disp['add_function_to_menu']('primitives', exit)
+    
+    
+    disp['start']()
