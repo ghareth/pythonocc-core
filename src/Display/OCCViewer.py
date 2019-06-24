@@ -51,7 +51,11 @@ from OCC.Core.Visualization import Display3d
 import OCC.Core.V3d
 from OCC.Core.V3d import V3d_Zpos as Zpos
 from OCC.Core.V3d import (V3d_ZBUFFER, V3d_PHONG, V3d_Zpos, V3d_Zneg, V3d_Xpos,
-                          V3d_Xneg, V3d_Ypos, V3d_Yneg, V3d_XposYnegZpos, V3d_TEX_ALL,
+                          V3d_Xneg, V3d_Ypos, V3d_Yneg, V3d_XposYnegZpos,
+                          V3d_YposZpos,
+                          V3d_YnegZpos,
+                          V3d_XposYnegZpos,
+                          V3d_TEX_ALL,
                           V3d_TEX_NONE, V3d_TEX_ENVIRONMENT,
                           V3d_LayerMgr)
 
@@ -301,26 +305,33 @@ class Viewer3d(Display3d):
         
         self.cam.SetProjectionType(0)
         self.View.ResetViewOrientation()
-        self.View.SetProj(OCC.V3d.V3d_Zneg)
+        self.View.SetProj(V3d_Zneg)
         self.FitAll()
         
     def View_Left(self):
-        self.View.SetProj(OCC.V3d.V3d_Xneg)
+        self.View.SetProj(V3d_Xneg)
 
     def View_Right(self):
-        self.View.SetProj(OCC.V3d.V3d_Xpos)
+        self.View.SetProj(V3d_Xpos)
 
     def View_Front(self):
-        self.View.SetProj(OCC.V3d.V3d_Yneg)
+        self.View.SetProj(V3d_Yneg)
 
     def View_Rear(self):
-        self.View.SetProj(OCC.V3d.V3d_Ypos)
+        self.View.SetProj(V3d_Ypos)
 
     def View_Iso(self):
         
-        self.cam.SetProjectionType(0)
+        self.cam.SetProjectionType(1)
         self.View.ResetViewOrientation()
-        self.View.SetProj(OCC.V3d.V3d_XposYnegZpos)
+        self.View.SetProj(V3d_XposYnegZpos)
+        self.FitAll()
+
+    def View_Above(self):
+        
+        self.cam.SetProjectionType(1)
+        self.View.ResetViewOrientation()
+        self.View.SetProj(V3d_YnegZpos)
         self.FitAll()
 
 

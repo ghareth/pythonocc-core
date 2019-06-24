@@ -68,7 +68,6 @@ class qtBaseViewer(QtOpenGL.QGLWidget):
         #QtOpenGL.QGLWidget.__init__(self, parent)
         self._display = None
         self._inited = False
-
         # enable Mouse Tracking
         self.setMouseTracking(True)
         # Strong focus
@@ -139,8 +138,8 @@ class qtViewer3d(qtBaseViewer):
         self._rightisdown = False
         self._selection = None
         self._drawtext = True
-        self._qApp = QtWidgets.QApplication.instance()
-        #self._qApp = None
+        #self._qApp = QtWidgets.QApplication.instance()
+        self._qApp = None
         self._key_map = {}
         self._current_cursor = "arrow"
         self._available_cursors = {}
@@ -176,8 +175,8 @@ class qtViewer3d(qtBaseViewer):
     def InitDriver(self, close_function):
         self.first = False
         self.close_window = close_function
-        self._display = OCCViewer.Viewer3d(window_handle=self.GetHandle(), parent=self)
-        #self._display = OCCViewer.Viewer3d(self)
+        #self._display = OCCViewer.Viewer3d(window_handle=self.GetHandle(), parent=self)
+        self._display = OCCViewer.Viewer3d(self.GetHandle())
         self._display.Create(perspective=self.perspective)
         # background gradient
         self._display.set_bg_gradient_color(206, 215, 222, 128, 128, 128)
@@ -234,11 +233,12 @@ class qtViewer3d(qtBaseViewer):
                          ord('G'): self._display.SetSelectionMode,
                          ord('Q'): self.close_window,
                          ord('1'): self._display.View_Iso,
-                         ord('2'): self._actions['perform'].trigger,
+                         # ord('2'): self._actions['perform'].trigger,
+                         ord('2'): self._display.View_Above,
                          ord('6'): self._display.Up,
-                         ord('9'): self._actions['view1'].trigger,
-                         ord('8'): self.timer,
-                         ord('7'): self.next_action
+                         # ord('9'): self._actions['view1'].trigger,
+                         # ord('8'): self.timer,
+                         # ord('7'): self.next_action
                          }
 
     

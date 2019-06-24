@@ -253,7 +253,7 @@ def init_display(backend_str=None,
             
         add_menu('exit')
         add_function_to_menu('exit', win.close)
-        add_function(win.close)
+        #add_function(win.close)
             
         disp['start'] = start_display
         disp['add_menu'] = add_menu
