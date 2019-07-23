@@ -277,7 +277,7 @@ def init_display(backend_str=None,
                     
                     self.room_display = room_display
                     self.palette = room_display.palette
-                    self.table = list(room_display.rooms)
+                    self.table = room_display.table
                 elif palette == None:
                     self.palette = palette_generator2(10)
                     self.table = table
@@ -301,12 +301,12 @@ def init_display(backend_str=None,
 
                 self.lookup_row = {}
                 for row, each in enumerate(self.table):
-                    if each:
-                        self.row_palette[row] = palette[each%len(palette)]
+                    if self.table[each]['string']:
+                        self.row_palette[row] = self.table[each]['color']
                         self.model.insertRows(row, 1, QtCore.QModelIndex())
-                        self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), str(each))
+                        self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), self.table[each]['string'])
                         self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()),
-                                            QtGui.QColor(self.row_palette[row]), QtCore.Qt.DecorationRole)
+                                            QtGui.QColor(self.table[each]['color']), QtCore.Qt.DecorationRole)
                 
 
             def openFile(self, *args, **kwargs):
