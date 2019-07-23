@@ -44,7 +44,9 @@ def init_display(backend_str=None,
                  display_triedron=True,
                  background_gradient_color1=[206, 215, 222],
                  background_gradient_color2=[128, 128, 128],
-                 perspective=True):
+                 perspective=True,
+                 table=None):
+
     """ This function loads and initialize a GUI using either wx, pyq4, pyqt5 or pyside.
     If ever the environment variable PYTHONOCC_OFFSCREEN_RENDERER, then the GUI is simply
     ignored and an offscreen renderer is returned.
@@ -60,6 +62,9 @@ def init_display(backend_str=None,
 
     Note : the offscreen renderer is used on the travis side.
     """
+    if table is None:
+        table = []
+
     if os.getenv("PYTHONOCC_OFFSCREEN_RENDERER") == "1":
         # create the offscreen renderer
         offscreen_renderer = OffscreenRenderer()
@@ -464,7 +469,7 @@ def init_display(backend_str=None,
         app = QtWidgets.QApplication.instance()  # checks if QApplication already exists
         if not app:  # create QApplication if it doesnt exist
             app = QtWidgets.QApplication(sys.argv)
-        win = LegendWindow(perspective = perspective)
+        win = LegendWindow(perspective = perspective, table=table)
         win.show()
         #win.window().setScreen(app.screens()[0])
         #win.resize(size[0], size[1])
@@ -474,7 +479,8 @@ def init_display(backend_str=None,
         display = win.canva._display
 
         # background gradient
-        display.set_bg_gradient_color(206, 215, 222, 128, 128, 128)
+        #display.set_bg_gradient_color(206, 215, 222, 128, 128, 128)
+        display.set_bg_gradient_color(255, 255, 255, 255, 255, 255) 
         # display black triedron
         display.display_triedron()
 
@@ -509,12 +515,12 @@ def init_display(backend_str=None,
         disp['add_function_to_menu'] = add_function_to_menu
         disp['add_function'] = add_function
         #disp['add_function_list'] = add_function_list
+        disp['selected'] = win.canva.selected
+        disp['add_table'] = win.add_table 
         disp['canva'] = win.canva
         disp['win'] = win
         
         #disp['close'] = close
-        
-        disp['selected'] = win.canva.selected
         
 
         
