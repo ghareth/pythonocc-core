@@ -811,13 +811,13 @@ class Viewer3d(Display3d):
         self.cam.SetProjectionType(1)
         self.cam.SetEye(pt)
 
-        d = gp.gp_Vec(pt2.XYZ())
-        center = pt.Translated(d)
-        self.cam.SetCenter(center)
+        d = gp.gp_Vec(pt, pt2)
+        self.cam.SetCenter(pt2)
+
         if d.X() == 0 and d.Y() == 0:
-            up = gp.gp_Vec(gp.gp_DZ()).Added(gp.gp_Vec(gp.gp_DY()))
+            up = gp.gp_Vec(gp.gp_DY())
         else:
-            up = gp.gp_Vec(gp.gp_DZ()).Added(d)    
+            up = gp.gp_Vec(gp.gp_DZ())
 
         self.cam.SetUp(gp.gp_Dir(up))
         self.cam.SetFOVy(60)
@@ -826,15 +826,55 @@ class Viewer3d(Display3d):
     def Up(self):
 
         self.View.SetUp(Zpos)
-        
         self.View.MustBeResized()
 
+    def PrintCamera(self):
+        log.info("---------------------------------------")
+        log.info("Camera settings")
+        eye = self.cam.Eye().Coord()
+        centre = self.cam.Center().Coord()
+        up = self.cam.Up().Coord()
+        fov = self.cam.FOVy()
+        scale = self.cam.Scale()
+        log.info("Eye: %s" % str(eye))
+        log.info("Center: %s" % str(centre))
+        log.info("Up: %s" % str(up))
+        log.info("FoV: %s" % str(fov))
+        log.info("Scale: %s" % str(scale))
+        log.info("---------------------------------------")
+
+    def SetCamera(self):
+
+        view = self.views["view1"]
+
+        eye = gp.gp_Pnt(*view["eye"])
+        centre = gp.gp_Pnt(*view["centre"])
+        up = gp.gp_Dir(*view["up"])
+        scale = view["scale"]
+        fov = view["fov"]
+
+        self.cam.SetEye(eye)
+        self.cam.SetCenter(centre)
+        self.cam.SetUp(up)
+        self.cam.SetScale(scale)
+        self.cam.SetFOVy(fov)
+
+        log.info("---------------------------------------")
+        log.info("Changing camera settings")
+        log.info("Eye: %s" % str(view["eye"]))
+        log.info("Center: %s" % str(view["centre"]))
+        log.info("Up: %s" % str(view["up"]))
+        log.info("FoV: %s" % str(view["fov"]))
+        log.info("Scale: %s" % str(view["scale"]))
+        log.info("---------------------------------------")
+        self.View.MustBeResized()
 
 class OffscreenRenderer(Viewer3d):
     """ The offscreen renderer is inherited from Viewer3d.
     The DisplayShape method is overriden to export to image
     each time it is called.
     """
+
     def __init__(self, screen_size=(640, 480)):
         Viewer3d.__init__(self, None)
         # create the renderer

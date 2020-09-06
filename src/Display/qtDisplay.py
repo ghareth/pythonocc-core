@@ -241,6 +241,8 @@ class qtViewer3d(qtBaseViewer):
                          # ord('2'): self._actions['perform'].trigger,
                          ord('2'): self._display.View_Above,
                          ord('6'): self._display.Up,
+                         ord('3'): self._display.PrintCamera,
+                         ord('4'): self._display.SetCamera,
                          # ord('9'): self._actions['view1'].trigger,
                          # ord('8'): self.timer,
                          # ord('7'): self.next_action
