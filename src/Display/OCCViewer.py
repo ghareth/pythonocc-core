@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 
-##Copyright 2008-2014 Thomas Paviot (tpaviot@gmail.com)
-##
-##This file is part of pythonOCC.
-##
-##pythonOCC is free software: you can redistribute it and/or modify
-##it under the terms of the GNU Lesser General Public License as published by
-##the Free Software Foundation, either version 3 of the License, or
-##(at your option) any later version.
-##
-##pythonOCC is distributed in the hope that it will be useful,
-##but WITHOUT ANY WARRANTY; without even the implied warranty of
-##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##GNU Lesser General Public License for more details.
-##
-##You should have received a copy of the GNU Lesser General Public License
-##along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright 2008-2014 Thomas Paviot (tpaviot@gmail.com)
+#
+# This file is part of pythonOCC.
+#
+# pythonOCC is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pythonOCC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
 
@@ -27,32 +27,28 @@ import math
 import itertools
 
 import OCC
-from OCC.Core.Aspect import Aspect_GFM_VER
-from OCC.Core.AIS import (AIS_MultipleConnectedInteractive,
-                          AIS_Shape,
+
+from OCC.Core.AIS import (AIS_Shape,
                           AIS_WireFrame,
                           AIS_TexturedShape,
                           AIS_Shaded)
 
 from OCC.Core.TopoDS import TopoDS_Shape
-
-#from OCC.gp import gp_Dir, gp_Pnt, gp_Pnt2d, gp_Vec
 import OCC.Core.gp as gp
-
 from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeVertex,
-                                BRepBuilderAPI_MakeEdge,
-                                BRepBuilderAPI_MakeEdge2d,
-                                BRepBuilderAPI_MakeFace)
+                                     BRepBuilderAPI_MakeEdge,
+                                     BRepBuilderAPI_MakeEdge2d,
+                                     BRepBuilderAPI_MakeFace)
 from OCC.Core.TopAbs import (TopAbs_FACE, TopAbs_EDGE, TopAbs_VERTEX,
-                        TopAbs_SHELL, TopAbs_SOLID)
+                             TopAbs_SHELL, TopAbs_SOLID)
 from OCC.Core.Geom import Geom_Curve, Geom_Surface
 from OCC.Core.Geom2d import Geom2d_Curve
 from OCC.Core.Visualization import Display3d
 import OCC.Core.V3d
 from OCC.Core.V3d import V3d_Zpos as Zpos
-from OCC.Core.V3d import (V3d_ZBUFFER, V3d_PHONG, V3d_Zpos, V3d_Zneg, V3d_Xpos,
-                          V3d_Xneg, V3d_Ypos, V3d_Yneg, V3d_XposYnegZpos,
-                          V3d_YposZpos,
+from OCC.Core.V3d import (V3d_ZBUFFER, V3d_PHONG, V3d_Zneg,
+                          V3d_Xpos,
+                          V3d_Xneg, V3d_Ypos, V3d_Yneg,
                           V3d_YnegZpos,
                           V3d_XposYnegZpos,
                           V3d_TEX_ALL,
@@ -61,30 +57,28 @@ from OCC.Core.V3d import (V3d_ZBUFFER, V3d_PHONG, V3d_Zpos, V3d_Zneg, V3d_Xpos,
 
 import OCC.Core.AIS
 
-from OCC.Core.TCollection import TCollection_ExtendedString, TCollection_AsciiString
-from OCC.Core.Quantity import (Quantity_Color, Quantity_TOC_RGB, Quantity_NOC_WHITE,
-                          Quantity_NOC_BLACK, Quantity_NOC_BLUE1,
-                          Quantity_NOC_CYAN1, Quantity_NOC_RED,
-                          Quantity_NOC_GREEN,
-                          Quantity_NOC_ORANGE, Quantity_NOC_YELLOW)
+from OCC.Core.TCollection import (TCollection_ExtendedString,
+                                  TCollection_AsciiString)
+from OCC.Core.Quantity import (Quantity_Color, Quantity_TOC_RGB,
+                               Quantity_NOC_WHITE,
+                               Quantity_NOC_BLACK, Quantity_NOC_BLUE1,
+                               Quantity_NOC_CYAN1, Quantity_NOC_RED,
+                               Quantity_NOC_GREEN,
+                               Quantity_NOC_ORANGE, Quantity_NOC_YELLOW)
 from OCC.Core.Prs3d import (Prs3d_Arrow, Prs3d_Presentation, Prs3d_Text,
-                       Prs3d_TextAspect)
+                            Prs3d_TextAspect)
 from OCC.Core.Graphic3d import (Graphic3d_NOM_NEON_GNC,
-                           Graphic3d_NOT_ENV_CLOUDS,
-                           Handle_Graphic3d_TextureEnv, Graphic3d_TextureEnv,
-                           Graphic3d_Camera, Graphic3d_RM_RAYTRACING,
-                           Graphic3d_RM_RASTERIZATION,
-                           Graphic3d_StereoMode_QuadBuffer,
-                           Graphic3d_RenderingParams)
+                                Graphic3d_NOT_ENV_CLOUDS,
+                                Handle_Graphic3d_TextureEnv,
+                                Graphic3d_TextureEnv,
+                                Graphic3d_Camera, Graphic3d_RM_RAYTRACING,
+                                Graphic3d_RM_RASTERIZATION,
+                                Graphic3d_StereoMode_QuadBuffer,
+                                Graphic3d_RenderingParams)
 
 from OCC.Core.Aspect import (Aspect_TOTP_RIGHT_LOWER,
-                             Aspect_TOFM_FRONT_SIDE,
-                             Aspect_TOFM_BACK_SIDE,
                              Aspect_FM_STRETCH,
                              Aspect_FM_NONE)
-
-
-
 
 from utils.logging_env import setup_logging, logging
 log = logging.getLogger(__name__)
@@ -93,18 +87,20 @@ setup_logging(log)
 # Shaders and Units definition must be found by occ
 # the fastest way to get done is to set the CASROOT env variable
 # it must point to the /share folder.
+
 if sys.platform == "win32":
     # do the same for Units
     if "CASROOT" in os.environ:
         casroot_path = os.environ["CASROOT"]
         # raise an error, force the user to correctly set the variable
-        err_msg = "Please set the CASROOT env variable (%s is not ok)" % casroot_path
+        err_msg = ("Please set the CASROOT env variable (%s is not ok)"
+                   % casroot_path)
         if not os.path.isdir(casroot_path):
             raise AssertionError(err_msg)
     else:  # on miniconda or anaconda or whatever conda
         occ_package_path = os.path.dirname(OCC.__file__)
         casroot_path = os.path.join(occ_package_path, '..', '..', '..',
-                               'Library', 'share', 'oce')
+                                    'Library', 'share', 'oce')
         # we check that all required files are at the right place
         shaders_dict_found = os.path.isdir(os.path.join(casroot_path,
                                                         'src', 'Shaders'))
@@ -112,8 +108,8 @@ if sys.platform == "win32":
                                                         'src', 'UnitsAPI',
                                                         'Lexi_Expr.dat'))
         unitsdefinition_found = os.path.isfile(os.path.join(casroot_path,
-                                                        'src', 'UnitsAPI',
-                                                        'Units.dat'))
+                                                            'src', 'UnitsAPI',
+                                                            'Units.dat'))
         if shaders_dict_found and unitlexicon_found and unitsdefinition_found:
             os.environ["CASROOT"] = casroot_path
 
@@ -131,8 +127,8 @@ def get_color_from_name(color_name):
     if enum_name in globals():
         color_num = globals()[enum_name]
         return Quantity_Color(color_num)
-    elif enum_name+'1' in globals():
-        color_num = globals()[enum_name+'1']
+    elif enum_name + '1' in globals():
+        color_num = globals()[enum_name + '1']
         print('Many colors for color name %s, using first.' % color_name)
     else:
         color_num = Quantity_NOC_WHITE
@@ -143,6 +139,7 @@ def get_color_from_name(color_name):
 def to_string(_string):
     return TCollection_ExtendedString(_string)
 
+
 # some thing we'll need later
 modes = itertools.cycle([TopAbs_FACE, TopAbs_EDGE,
                          TopAbs_VERTEX,
@@ -151,7 +148,7 @@ modes = itertools.cycle([TopAbs_FACE, TopAbs_EDGE,
 
 class Viewer3d(Display3d):
     def __init__(self, window_handle, parent=None):
-        
+
         Display3d.__init__(self)
         self._parent = parent  # the parent opengl GUI container
         self._window_handle = window_handle
@@ -169,6 +166,7 @@ class Viewer3d(Display3d):
         self._select_callbacks = []
         self.shapes = {}
         self._overlay_items = []
+        self.views = {}
 
     def get_parent(self):
         return self._parent
@@ -187,14 +185,15 @@ class Viewer3d(Display3d):
         """ Adds a callback that will be called each time a shape s selected
         """
         if not callable(callback):
-            raise AssertionError("You must provide a callable to register the callback")
+            raise AssertionError("You must provide a callable to register"
+                                 " the callback")
         else:
             self._select_callbacks.append(callback)
 
     def unregister_callback(self, callback):
         """ Remove a callback from the callback list
         """
-        if not callback in self._select_callbacks:
+        if callback not in self._select_callbacks:
             raise AssertionError("This callback is not registered")
         else:
             self._select_callbacks.remove(callback)
@@ -206,13 +205,15 @@ class Viewer3d(Display3d):
         self.View.ZFitAll()
         self.View.FitAll(0.1)
 
-    def Create(self, create_default_lights=True, draw_face_boundaries=True, phong_shading=True, perspective = False):
+    def Create(self, create_default_lights=True,
+               draw_face_boundaries=True, phong_shading=True,
+               perspective=False):
         if self._window_handle is None:
             self.InitOffscreen(640, 480)
             self._is_offscreen = True
         else:
             self.Init(self._window_handle)
-            self._is_offscreen = False        
+            self._is_offscreen = False
         self.Context = self.GetContext()
         self.Viewer = self.GetViewer()
         self.View = self.GetView()
@@ -239,11 +240,10 @@ class Viewer3d(Display3d):
 
         # necessary for text rendering
         self._struc_mgr = self.Context.MainPrsMgr().StructureManager()
-        
+
         self.cam = self.View.Camera()
-        self.cam.SetProjectionType(1)  
-        
-        
+        self.cam.SetProjectionType(1)
+
         # overlayer
         self.OverLayer = self.Viewer.Viewer().OverLayer()
         if self.OverLayer is None:
@@ -258,17 +258,17 @@ class Viewer3d(Display3d):
         # turn self._inited flag to True
         self._inited = True
 
-    
-    ##### Removed from later versions of PythonOCC
+    # Removed from later versions of PythonOCC #######################
     def SetDoubleBuffer(self, on_or_off):
         """enables double buffering when shapes are moved in the viewer
         a very shaky picture is drawn, since double buffering
         is disabled by default. fixed here..."""
         self.View.Window().SetDoubleBuffer(bool(on_or_off))
-    #####
+    # ################################################################
 
     def OnResize(self):
         self.View.MustBeResized()
+
     def ResetView(self):
         self.View.Reset()
 
@@ -302,12 +302,12 @@ class Viewer3d(Display3d):
         self.View.SetProj(OCC.V3d.V3d_Zpos)
 
     def View_Bottom(self):
-        
+
         self.cam.SetProjectionType(0)
         self.View.ResetViewOrientation()
         self.View.SetProj(V3d_Zneg)
         self.FitAll()
-        
+
     def View_Left(self):
         self.View.SetProj(V3d_Xneg)
 
@@ -321,19 +321,18 @@ class Viewer3d(Display3d):
         self.View.SetProj(V3d_Ypos)
 
     def View_Iso(self):
-        
+
         self.cam.SetProjectionType(1)
         self.View.ResetViewOrientation()
         self.View.SetProj(V3d_XposYnegZpos)
         self.FitAll()
 
     def View_Above(self):
-        
+
         self.cam.SetProjectionType(1)
         self.View.ResetViewOrientation()
         self.View.SetProj(V3d_YnegZpos)
         self.FitAll()
-
 
     def EnableTextureEnv(self, name_of_texture=Graphic3d_NOT_ENV_CLOUDS):
         """ enable environment mapping. Possible modes are
@@ -355,8 +354,11 @@ class Viewer3d(Display3d):
     def DisableTextureEnv(self):
         self.View.SetSurfaceDetail(V3d_TEX_NONE)
         a_null_texture = Handle_Graphic3d_TextureEnv()
-        self.View.SetTextureEnv(a_null_texture) # Passing null handle to clear the texture data
+        self.View.SetTextureEnv(a_null_texture)  # Passing null handle
+        #                                          to clear the texture data
         self.View.Redraw()
+
+    RedCyan_Optimized = Graphic3d_RenderingParams.Anaglyph_RedCyan_Optimized
 
     def SetRenderingParams(self,
                            Method=Graphic3d_RM_RASTERIZATION,
@@ -366,7 +368,7 @@ class Viewer3d(Display3d):
                            IsAntialiasingEnabled=False,
                            IsTransparentShadowEnabled=False,
                            StereoMode=Graphic3d_StereoMode_QuadBuffer,
-                           AnaglyphFilter=Graphic3d_RenderingParams.Anaglyph_RedCyan_Optimized,
+                           AnaglyphFilter=RedCyan_Optimized,
                            ToReverseStereo=False):
         """ Default values are :
             Method=Graphic3d_RM_RASTERIZATION,
@@ -404,20 +406,21 @@ class Viewer3d(Display3d):
                                 IsShadowEnabled=True,
                                 IsReflectionEnabled=True,
                                 IsTransparentShadowEnabled=True)
+
     def ExportToImage(self, image_filename):
         self.View.Dump(image_filename)
 
-    #### Removed from later versions of PythonOCC
-    #def set_raytracing_mode(self, shadows=True, reflections=True, antialiasing=True):
-        #self.View.SetRaytracingMode()
-        #if shadows:
-            #self.View.EnableRaytracedShadows()
-        #if reflections:
-            #self.View.EnableRaytracedReflections()
-        #if antialiasing:
-            #self.View.EnableRaytracedAntialiasing()
-    ####
-
+    # ### Removed from later versions of PythonOCC #########
+    # def set_raytracing_mode(self, shadows=True, reflections=True,
+        # antialiasing=True):
+        # self.View.SetRaytracingMode()
+        # if shadows:
+        #     self.View.EnableRaytracedShadows()
+        # if reflections:
+        #     self.View.EnableRaytracedReflections()
+        # if antialiasing:
+        #    self.View.EnableRaytracedAntialiasing()
+    # #####################################################
 
     def display_graduated_trihedron(self):
         self.View.GraduatedTrihedronDisplay()
@@ -425,18 +428,20 @@ class Viewer3d(Display3d):
     def display_triedron(self):
         """ Show a black triedron in lower right corner
         """
-        self.View.TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_BLACK, 0.1, V3d_ZBUFFER)
+        self.View.TriedronDisplay(Aspect_TOTP_RIGHT_LOWER,
+                                  Quantity_NOC_BLACK, 0.1, V3d_ZBUFFER)
 
     def hide_triedron(self):
         """ Show a black triedron in lower right corner
         """
         self.View.TriedronErase()
+
     def set_bg_gradient_color(self, R1, G1, B1, R2, G2, B2):
         """ set a bg vertical gradient color.
         R, G and B are floats.
         """
-        aColor1 = rgb_color(float(R1)/255., float(G1)/255., float(B1)/255.)
-        aColor2 = rgb_color(float(R2)/255., float(G2)/255., float(B2)/255.)
+        aColor1 = rgb_color(float(R1) / 255, float(G1) / 255, float(B1) / 255)
+        aColor2 = rgb_color(float(R2) / 255, float(G2) / 255, float(B2) / 255)
         self.View.SetBgGradientColors(aColor1, aColor2, 2, True)
 
     def SetBackgroundImage(self, image_filename, stretch=True):
@@ -445,7 +450,8 @@ class Viewer3d(Display3d):
         if not os.path.isfile(image_filename):
             raise IOError("image file %s not found." % image_filename)
         if stretch:
-            self.View.SetBackgroundImage(image_filename, Aspect_FM_STRETCH, True)
+            self.View.SetBackgroundImage(image_filename,
+                                         Aspect_FM_STRETCH, True)
         else:
             self.View.SetBackgroundImage(image_filename, Aspect_FM_NONE, True)
 
@@ -473,7 +479,8 @@ class Viewer3d(Display3d):
                 self.Repaint()
             return aPresentation
 
-    def DisplayMessage(self, point, text_to_write, height=None, message_color=None, update=False):
+    def DisplayMessage(self, point, text_to_write, height=None,
+                       message_color=None, update=False):
         """
         :point: a gp_Pnt or gp_Pnt2d instance
         :text_to_write: a string
@@ -499,7 +506,8 @@ class Viewer3d(Display3d):
             self.Repaint()
         return aPresentation
 
-    def DisplayShape(self, shapes, material=None, texture=None, color=None, transparency=None, update=False, name=""):
+    def DisplayShape(self, shapes, material=None, texture=None, color=None,
+                     transparency=None, update=False, name=""):
         """ display one or a set of displayable objects
         """
         SOLO = False  # assume multiple instances by default
@@ -509,7 +517,8 @@ class Viewer3d(Display3d):
             shapes = [vertex.Shape()]
             SOLO = True
         elif isinstance(shapes, gp.gp_Pnt2d):
-            vertex = BRepBuilderAPI_MakeVertex(gp.gp_Pnt(shapes.X(), shapes.Y(), 0))
+            vertex = BRepBuilderAPI_MakeVertex(gp.gp_Pnt(shapes.X(),
+                                                         shapes.Y(), 0))
             shapes = [vertex.Shape()]
             SOLO = True
         elif isinstance(shapes, Geom_Surface):
@@ -539,26 +548,30 @@ class Viewer3d(Display3d):
                 if texture:
                     self.View.SetSurfaceDetail(V3d_TEX_ALL)
                     shape_to_display = AIS_TexturedShape(shape)
-                    filename, toScaleU, toScaleV, toRepeatU, toRepeatV, originU, originV = texture.GetProperties()
-                    shape_to_display.SetTextureFileName(TCollection_AsciiString(filename))
+                    (filename, toScaleU, toScaleV, toRepeatU, toRepeatV,
+                     originU, originV) = texture.GetProperties()
+                    shape_to_display.SetTextureFileName(
+                        TCollection_AsciiString(filename))
                     shape_to_display.SetTextureMapOn()
                     shape_to_display.SetTextureScale(True, toScaleU, toScaleV)
-                    shape_to_display.SetTextureRepeat(True, toRepeatU, toRepeatV)
+                    shape_to_display.SetTextureRepeat(
+                        True, toRepeatU, toRepeatV)
                     shape_to_display.SetTextureOrigin(True, originU, originV)
                     shape_to_display.SetDisplayMode(3)
                 elif material:
                     shape_to_display = AIS_Shape(shape)
-                    #shape_to_display.SetCurrentFacingModel(Aspect_TOFM_FRONT_SIDE)
-                    self.shapes[shape.__hash__()] = {'ais' : shape_to_display, 'name' :name}
+                    # shape_to_display.SetCurrentFacingModel(
+                    # Aspect_TOFM_FRONT_SIDE)
+                    self.shapes[shape.__hash__()] = {'ais': shape_to_display,
+                                                     'name': name}
                     shape_to_display.SetMaterial(material)
             else:
                 # TODO: can we use .Set to attach all TopoDS_Shapes
                 # to this AIS_Shape instance?
-                
-                shape_to_display = AIS_Shape(shape)
-                self.shapes[shape.__hash__()] = {'ais' : shape_to_display, 'name' :name}
 
-                
+                shape_to_display = AIS_Shape(shape)
+                self.shapes[shape.__hash__()] = {'ais': shape_to_display,
+                                                 'name': name}
 
             ais_shapes.append(shape_to_display)
 
@@ -566,18 +579,18 @@ class Viewer3d(Display3d):
             # computing graphic properties is expensive
             # if an iterable is found, so cluster all TopoDS_Shape under
             # an AIS_MultipleConnectedInteractive
-            #shape_to_display = AIS_MultipleConnectedInteractive()
+            # shape_to_display = AIS_MultipleConnectedInteractive()
             for ais_shp in ais_shapes:
                 # TODO : following line crashes with oce-0.18
                 # why ? fix ?
-                #shape_to_display.Connect(i)
+                # shape_to_display.Connect(i)
                 self.Context.Display(ais_shp, False)
             shape_to_display = ais_shapes
             return shape_to_display
         # set the graphic properties
         if material is None:
-            #The default material is too shiny to show the object
-            #color well, so I set it to something less reflective
+            # The default material is too shiny to show the object
+            # color well, so I set it to something less reflective
             shape_to_display.SetMaterial(Graphic3d_NOM_NEON_GNC)
         if color:
             if isinstance(color, str):
@@ -614,7 +627,9 @@ class Viewer3d(Display3d):
         elif isinstance(color, Quantity_Color):
             clr = color
         else:
-            raise ValueError('color should either be a string ( "BLUE" ) or a Quantity_Color(0.1, 0.8, 0.1) got %s' % color)
+            raise ValueError('color should either be a string ( "BLUE" )'
+                             ' or a Quantity_Color(0.1, 0.8, 0.1) got %s'
+                             % color)
 
         return self.DisplayShape(shapes, color=clr, update=update)
 
@@ -672,9 +687,10 @@ class Viewer3d(Display3d):
         return self.selected_shape
 
     def SelectArea(self, Xmin, Ymin, Xmax, Ymax):
-        
-        self.Context.MoveTo(int(Xmin+(Xmax-Xmin)/2),int(Ymin+(Ymax-Ymin)/2), self.View)
-        
+
+        self.Context.MoveTo(int(Xmin + (Xmax - Xmin) / 2),
+                            int(Ymin + (Ymax - Ymin) / 2), self.View)
+
         self.Context.Select(Xmin, Ymin, Xmax, Ymax, self.View)
         self.Context.InitSelected()
         # reinit the selected_shapes list
@@ -683,17 +699,17 @@ class Viewer3d(Display3d):
             if self.Context.HasSelectedShape():
                 self.selected_shapes.append(self.Context.SelectedShape())
             self.Context.NextSelected()
-            
-        #print("Selected Shapes %s"%str(self.selected_shapes))
+
+        # print("Selected Shapes %s"%str(self.selected_shapes))
 
         # callbacks
         for callback in self._select_callbacks:
             callback(self.selected_shapes, Xmin, Ymin, Xmax, Ymax)
-        
+
         return self.selected_shapes
 
     def Select(self, X, Y):
-        self.Context.MoveTo(X,Y, self.View)
+        self.Context.MoveTo(X, Y, self.View)
 
         self.Context.Select()
         self.Context.InitSelected()
@@ -705,41 +721,36 @@ class Viewer3d(Display3d):
         # callbacks
         for callback in self._select_callbacks:
             callback(self.selected_shapes, X, Y)
-        #print(X,Y, self.selected_shapes)
-        #sys.stdout.flush()
+        # print(X,Y, self.selected_shapes)
+        # sys.stdout.flush()
         return self.selected_shapes
-    
+
     def Select5(self, X, Y):
-        
+
         selected_shapes = set()
-        
-        for dx in range(-1,2):
-            for dy in range(-1,2):
-                self.Context.MoveTo(X+dx,Y+dy, self.View, True)
+
+        for dx in range(-1, 2):
+            for dy in range(-1, 2):
+                self.Context.MoveTo(X + dx, Y + dy, self.View, True)
                 self.Context.Select()
                 self.Context.InitSelected()
-                
+
                 if self.Context.MoreSelected():
                     if self.Context.HasSelectedShape():
-                        selected_shapes.add(self.Context.SelectedShape().__hash__())
+                        hash_ = self.Context.SelectedShape().__hash__()
+                        selected_shapes.add(hash_)
 
-        self.selected_shapes = [self.shapes[each_shape]['ais'].Shape() for each_shape in selected_shapes]
-        
-            # callbacks
+        self.selected_shapes = [self.shapes[each_shape]['ais'].Shape()
+                                for each_shape in selected_shapes]
+
+        # callbacks
         for callback in self._select_callbacks:
             callback(self.selected_shapes, X, Y)
-        #print(X,Y, self.selected_shapes)
-        #sys.stdout.flush()
-        
-        
-        
-        
-        #self.DisplayMessage(point, text_to_write)
-        
-        
-        
-        
-        return self.selected_shapes    
+        # print(X,Y, self.selected_shapes)
+        # sys.stdout.flush()
+        # self.DisplayMessage(point, text_to_write)
+
+        return self.selected_shapes
 
     def ShiftSelect(self, X, Y):
         self.Context.ShiftSelect()
@@ -773,32 +784,32 @@ class Viewer3d(Display3d):
 
     def StartRotation(self, X, Y):
         self.View.StartRotation(X, Y)
-        
+
     def ViewDirection(self, pt, direction, fov=100):
-        
+
         self.cam.SetProjectionType(1)
         self.cam.SetEye(pt)
-        
+
         d = gp.gp_Vec(direction)
         center = pt.Translated(d.Multiplied(1000))
         if d.X() == 0 and d.Y() == 0:
             up = gp.gp_Vec(gp.gp_DZ()).Added(gp.gp_Vec(gp.gp_DY()))
         else:
             up = gp.gp_Vec(gp.gp_DZ()).Added(d)
-            
+
         self.cam.SetCenter(center)
         self.cam.SetUp(gp.gp_Dir(up))
         self.cam.SetFOVy(fov)
-        
+
         self.View.MustBeResized()
-        
-        #print ("center %s"%str(center.Coord()))
-        #print ("up %s"%str(up.Coord()))
-        
+
+        # print ("center %s"%str(center.Coord()))
+        # print ("up %s"%str(up.Coord()))
+
     def ViewPoint(self, pt, pt2):
-        
+
         self.cam.SetProjectionType(1)
-        self.cam.SetEye(pt)        
+        self.cam.SetEye(pt)
 
         d = gp.gp_Vec(pt2.XYZ())
         center = pt.Translated(d)
@@ -807,18 +818,18 @@ class Viewer3d(Display3d):
             up = gp.gp_Vec(gp.gp_DZ()).Added(gp.gp_Vec(gp.gp_DY()))
         else:
             up = gp.gp_Vec(gp.gp_DZ()).Added(d)    
-        
+
         self.cam.SetUp(gp.gp_Dir(up))
         self.cam.SetFOVy(60)
         self.View.MustBeResized()
-        
+
     def Up(self):
-        
+
         self.View.SetUp(Zpos)
         
         self.View.MustBeResized()
 
-        
+
 class OffscreenRenderer(Viewer3d):
     """ The offscreen renderer is inherited from Viewer3d.
     The DisplayShape method is overriden to export to image
@@ -834,10 +845,14 @@ class OffscreenRenderer(Viewer3d):
         self.display_triedron()
         self.capture_number = 0
 
-    def DisplayShape(self, shapes, material=None, texture=None, color=None, transparency=None, update=True):
+    def DisplayShape(self, shapes, material=None, texture=None,
+                     color=None, transparency=None, update=True):
         # call the "original" DisplayShape method
-        r = super(OffscreenRenderer, self).DisplayShape(shapes, material, texture,
-                                                        color, transparency, update)  # always update
+        r = super(OffscreenRenderer, self).DisplayShape(shapes, material,
+                                                        texture,
+                                                        color,
+                                                        transparency,
+                                                        update) # always update
         if os.getenv("PYTHONOCC_OFFSCREEN_RENDERER_DUMP_IMAGE") == "1":  # dump to jpeg file
             timestamp = ("%f" % time.time()).split(".")[0]
             self.capture_number += 1
@@ -846,15 +861,15 @@ class OffscreenRenderer(Viewer3d):
             if os.getenv("PYTHONOCC_OFFSCREEN_RENDERER_DUMP_IMAGE_PATH"):
                 path = os.getenv("PYTHONOCC_OFFSCREEN_RENDERER_DUMP_IMAGE_PATH")
                 if not os.path.isdir(path):
-                	raise IOError("%s is not a valid path" % path)
+                    raise IOError("%s is not a valid path" % path)
             else:
                 path = os.getcwd()
             image_full_name = os.path.join(path, image_filename)
             self.View.Dump(image_full_name)
             if not os.path.isfile(image_full_name):
-            	raise IOError("OffscreenRenderer failed to render image to file")
+                raise IOError("OffscreenRenderer failed to render image to file")
             print("OffscreenRenderer content dumped to %s" % image_full_name)
         return r        
-        
-        
-        
+
+
+
