@@ -44,7 +44,6 @@ def init_display(backend_str=None,
                  display_triedron=True,
                  background_gradient_color1=[206, 215, 222],
                  background_gradient_color2=[128, 128, 128],
-                 perspective=True,
                  table=None):
 
     """ This function loads and initialize a GUI using either wx, pyq4, pyqt5 or pyside.
@@ -86,7 +85,7 @@ def init_display(backend_str=None,
         return offscreen_renderer, do_nothing, do_nothing, call_function
     used_backend = load_backend(backend_str)
     log.debug("GUI backend set to: %s", used_backend)
-    
+
     # wxPython based simple GUI
     if used_backend == 'wx':
         import wx
@@ -138,25 +137,23 @@ def init_display(backend_str=None,
 
     # Qt based simple GUI
     elif 'qt' in used_backend:
-        
+
         from pythonocc.Display.qtDisplay import qtViewer3d
-              
-        
+
         QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
 
         class MainWindow(QtWidgets.QMainWindow):
 
             def __init__(self, *args, **kwargs):
                 QtWidgets.QMainWindow.__init__(self, *args)
-                
-                perspective = kwargs.get('perspective', False)
-                
-                self.canva = qtViewer3d(self, perspective = perspective)
+
+                # perspective = kwargs.get('perspective', False)
+                self.canva = qtViewer3d(self)
                 self.setWindowTitle("pythonOCC-%s 3d viewer ('%s' backend)" % (VERSION, used_backend))
                 self.setCentralWidget(self.canva)
                 if sys.platform != 'darwin':
                     self.menu_bar = self.menuBar()
-                    
+
                 else:
                     # create a parentless menubar
                     # see: http://stackoverflow.com/questions/11375176/qmenubar-and-qmenu-doesnt-show-in-mac-os-x?lq=1
@@ -165,10 +162,10 @@ def init_display(backend_str=None,
                     # next to the apple icon
                     # still does ugly things like showing the "Python" menu in
                     # bold
-                    
-                    #Origial code ..
-                    #self.menu_bar = QtWidgets.QMenuBar()
-                    #Replaced by http://littlecaptain.net/2017/10/13/PyQt5-tutorial-Menus-and-toolbars/
+
+                    # Origial code ..
+                    # self.menu_bar = QtWidgets.QMenuBar()
+                    # Replaced by http://littlecaptain.net/2017/10/13/PyQt5-tutorial-Menus-and-toolbars/
                     self.menu_bar = self.menuBar()
                     self.menu_bar.setNativeMenuBar(False)
                 self._menus = {}
@@ -181,7 +178,8 @@ def init_display(backend_str=None,
                 '''Centers the window on the screen.'''
                 resolution = QtWidgets.QDesktopWidget().screenGeometry()
                 log.debug( resolution)
-                self.resize((resolution.width() / 1.1), (resolution.height() / 1.1))
+                self.resize((resolution.width() / 1.1),
+                            (resolution.height() / 1.1))
                 
                 self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
                           (resolution.height() / 2) - (self.frameSize().height() / 2))
@@ -469,7 +467,7 @@ def init_display(backend_str=None,
         app = QtWidgets.QApplication.instance()  # checks if QApplication already exists
         if not app:  # create QApplication if it doesnt exist
             app = QtWidgets.QApplication(sys.argv)
-        win = LegendWindow(perspective = perspective, table=table)
+        win = LegendWindow(table=table)
         win.show()
         #win.window().setScreen(app.screens()[0])
         #win.resize(size[0], size[1])
@@ -480,7 +478,7 @@ def init_display(backend_str=None,
 
         # background gradient
         #display.set_bg_gradient_color(206, 215, 222, 128, 128, 128)
-        display.set_bg_gradient_color(255, 255, 255, 255, 255, 255) 
+        display.set_bg_gradient_color([255, 255, 255], [255, 255, 255]) 
         # display black triedron
         display.display_triedron()
 
@@ -493,8 +491,7 @@ def init_display(backend_str=None,
         def start_display():
             win.raise_()  # make the application float to the top
             app.exec_()
-            
-            
+
         def add_function(*args, **kwargs):
             win.add_function(*args, **kwargs)
 
