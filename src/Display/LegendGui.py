@@ -44,7 +44,8 @@ def init_display(backend_str=None,
                  display_triedron=True,
                  background_gradient_color1=[206, 215, 222],
                  background_gradient_color2=[128, 128, 128],
-                 table=None):
+                 table=None,
+                 test=False):
 
     """ This function loads and initialize a GUI using either wx, pyq4, pyqt5 or pyside.
     If ever the environment variable PYTHONOCC_OFFSCREEN_RENDERER, then the GUI is simply
@@ -478,9 +479,13 @@ def init_display(backend_str=None,
 
         # background gradient
         #display.set_bg_gradient_color(206, 215, 222, 128, 128, 128)
-        display.set_bg_gradient_color([255, 255, 255], [255, 255, 255]) 
+        display.set_bg_gradient_color(255, 255, 255, 255, 255, 255) 
+        # display.set_bg_gradient_color([255, 255, 255], [255, 255, 255]) 
         # display black triedron
         display.display_triedron()
+        
+        if test==True:        
+            QtCore.QTimer.singleShot(0, win.close)                
 
         def add_menu(*args, **kwargs):
             win.add_menu(*args, **kwargs)
